@@ -23,7 +23,7 @@
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/你的用户名/snake-game.git
+   git clone <repository-url>
    cd snake-game
    ```
 
@@ -142,14 +142,137 @@ A: 删除`high_score.txt`文件，游戏会自动创建新的
 4. **障碍物模式** - 在场景中添加固定障碍物
 5. **多人模式** - 双人对战版本
 
-## 📝 开发说明
+## 📦 打包为可执行文件 (.exe)
 
-这个贪吃蛇游戏采用面向对象编程设计，代码结构清晰，易于理解和扩展。主要特点：
+如果你想将游戏打包成独立的Windows可执行文件，可以使用PyInstaller。
 
-- 遵循PEP8编码规范
-- 使用类封装游戏逻辑
-- 完善的错误处理机制
-- 模块化的代码结构
+### 打包步骤
+
+1. **安装PyInstaller**
+   ```bash
+   pip install pyinstaller
+   ```
+
+2. **创建打包脚本**（可选）
+   创建一个名为`build.spec`的文件：
+   ```python
+   # build.spec
+   block_cipher = None
+
+   a = Analysis(
+       ['snake_game.py'],
+       pathex=[],
+       binaries=[],
+       datas=[],
+       hiddenimports=[],
+       hookspath=[],
+       hooksconfig={},
+       runtime_hooks=[],
+       excludes=[],
+       win_no_prefer_redirects=False,
+       win_private_assemblies=False,
+       cipher=block_cipher,
+       noarchive=False,
+   )
+
+   pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+   exe = EXE(
+       pyz,
+       a.scripts,
+       a.binaries,
+       a.zipfiles,
+       a.datas,
+       name='SnakeGame',
+       debug=False,
+       bootloader_ignore_signals=False,
+       strip=False,
+       upx=True,
+       upx_exclude=[],
+       runtime_tmpdir=None,
+       console=False,  # 设置为True显示控制台窗口，False不显示
+       disable_windowed_traceback=False,
+       argv_emulation=False,
+       target_arch=None,
+       codesign_identity=None,
+       entitlements_file=None,
+   )
+   ```
+
+3. **执行打包命令**
+   ```bash
+   # 简单打包（显示控制台窗口）
+   pyinstaller --onefile snake_game.py
+
+   # 不显示控制台窗口（推荐用于游戏）
+   pyinstaller --onefile --noconsole snake_game.py
+
+   # 添加图标（需要准备.ico文件）
+   pyinstaller --onefile --noconsole --icon=snake.ico snake_game.py
+
+   # 使用spec文件打包
+   pyinstaller build.spec
+   ```
+
+4. **获取可执行文件**
+   打包完成后，在生成的`dist`文件夹中找到`snake_game.exe`文件。
+
+### 高级打包配置
+
+如果你有资源文件（如图片、音效），需要额外配置：
+
+```bash
+# 包含资源文件
+pyinstaller --onefile --noconsole --add-data "assets;assets" snake_game.py
+```
+
+创建对应的spec文件：
+```python
+# build_with_assets.spec
+a = Analysis(
+    ['snake_game.py'],
+    pathex=[],
+    binaries=[],
+    datas=[('assets/*', 'assets')],  # 包含assets文件夹
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=None,
+    noarchive=False,
+)
+```
+
+### 解决常见打包问题
+
+**问题1：打包后运行闪退**
+- 解决方案：先用`--console`参数打包，查看错误信息
+- 确保所有依赖项都正确包含
+
+**问题2：文件大小太大**
+- 使用UPX压缩：
+  ```bash
+  pyinstaller --onefile --noconsole --upx-dir="path/to/upx" snake_game.py
+  ```
+
+**问题3：缺少依赖模块**
+- 在spec文件中添加hiddenimports：
+  ```python
+  hiddenimports=['pygame'],
+  ```
+
+### 测试打包结果
+
+打包完成后，建议在干净的Windows环境中测试.exe文件：
+1. 将.exe文件复制到新文件夹
+2. 双击运行测试功能是否正常
+3. 测试所有游戏功能（移动、暂停、重新开始等）
+
+
+这样就可以在没有Python环境的Windows电脑上直接运行你的贪吃蛇游戏了！
 
 ---
 
